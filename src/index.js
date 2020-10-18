@@ -1,17 +1,64 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import Message from './Components/Message';
+
+const Content = (prop) => {   
+    if(prop.message && !prop.latitude) {
+      return (    
+        <div> 
+            <Message header="Location Error">
+                 <p>{prop.message}</p>       
+            </Message>                
+        </div>
+        );  
+    }
+
+    if(!prop.message && prop.latitude) {
+        return (
+            <div> 
+                <Message header="Location">
+                    <p>Latitude: {prop.latitude}</p>
+                    <p>Longitude: {prop.longitude}</p>      
+                </Message>
+            </div>
+        );
+    }
+    return (
+        <div> 
+            <Message header="Location">
+             <p>Loading....</p>           
+            </Message>
+        </div>
+    );
+};
+
+class App extends React.Component {    
+
+    constructor (props) {
+        super(props);
+        this.state = { lat: null , long: null, message: null };        
+    }
+
+    componentDidMount() {
+        window.navigator.geolocation.getCurrentPosition(
+            position => {
+                this.setState({
+                    lat: position.coords.latitude, 
+                    long: position.coords.longitude                   
+                });
+            },
+            err => {
+                this.setState({message: err.message})
+            }
+        );
+    }
+
+    render () {             
+        return Content({latitude: this.state.lat ,longitude: this.state.long, message: this.state.message });
+    }
+}
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+    <App/>,
+    document.querySelector('#root')
 );
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
